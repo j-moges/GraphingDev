@@ -5,6 +5,69 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+#----------------------------------------------
+#	Function definitions - Main code below...
+#----------------------------------------------
+
+def toCartesian(dictOfPoints):
+	#using GPS coordinates in DDM format from file
+	x = []
+	y = []
+	points = []
+	latLon = []
+	latDeg = 0
+	lonDeg = 0
+	latMin = 0
+	lonMin = 0
+	lat = 0.0
+	lon = 0.0
+	#just get the coordinates
+	for val in dictOfPoints:
+		latLon.append(dictOfPoints[val].split(",")[0])
+	#now separate the latitude and longitude, do the math, and store in x and y
+	for val in latLon:
+		temp = val.split(" ")
+		#print(temp)
+		#latitude manipulation
+		if "+" in temp[0]:
+			latDeg = temp[0][1:]
+			int(latDeg) #make sure it's an int
+		if "-" in temp[0]:
+			latDeg = temp[0][1:]
+			int(latDeg) #make sure it's an int
+			latDeg = (-latDeg)
+		latMin = float(temp[1][:-1]) #get rid of N/S
+
+		#longitude
+		if "+" in temp[2]:
+			lonDeg = temp[2][1:]
+			int(lonDeg)
+		if "-" in temp[2]:
+			lonDeg = temp[2][1:]
+			int(lonDeg)
+			#print(lonDeg)
+			#lonDeg = (-lonDeg)
+		lonMin = float(temp[3][:-1]) #get rid of E/W
+
+		lat = float(latDeg) + (latMin / 60)
+		lon = float(lonDeg) + (lonMin / 60)
+		x.append(lat)
+		y.append(lon)
+		xStr = x[-1]
+		yStr = y[-1]
+		point = str(xStr) + ", " + str(yStr)
+		points.append(point)
+	#print(points)
+	return x, y
+
+
+	#print(latLon)
+
+
+#-------------------------------------------------------------------
+#			END of Function Definitions - Start of main program
+#-------------------------------------------------------------------
+
 root = Tk()
 root.fileName = filedialog.askopenfilename( filetypes = 
 	( ("Text File", "*.txt"), ("Comma Separated", "*.csv"), ("All Files", "*.*") ) )
@@ -12,7 +75,7 @@ root.fileName = filedialog.askopenfilename( filetypes =
 logFile = root.fileName
 
 root.quit() 
-root.destroy() #close out the Tk interface for the file opening prompt
+root.destroy() #close out the Tk interface from the file opening prompt
 
 with open(logFile) as f:
 	loggedData = f.readlines()
@@ -21,24 +84,30 @@ lineData = []
 #get rid of \n and create a list for each set of values
 loggedData = [i.split('\n') for i in loggedData]
 
-print('-------------------')
-print(loggedData[-1][0])
-
-
-print('-----------------')
+#print('-------------------')
+#print(loggedData[-1][0])
+#print('-----------------')
 
 i = 1
 
 latitude = []
+longitude = []
 rpm = []
+
+plotLink = {} #dictionary to link the mouse position in the lower plot to a dot on the GPS plot
 
 #this while loop only parses out and converts RPM.  Reuse this to do it for everything else
 while i < len(loggedData):
 	dataPoint = loggedData[i][0] #String of the data point
 	dataPoint = dataPoint.split(',') #creates a list separating different types of data
 
+	gpsPoint = dataPoint[0] #get the GPS coordinate from the data point
+	#print(gpsPoint)
+
 	rpmDataItem = (dataPoint[-2])
 	rpmDataItem = rpmDataItem.replace(" ", "") #eliminate whitespace from the string
+
+	plotLink[i] = (gpsPoint + ", " + rpmDataItem) #add the GPS and RPM to the dictionary
 
 	if rpmDataItem == "":
 		rawData = 0
@@ -47,9 +116,18 @@ while i < len(loggedData):
 	rpm.append(rawData)
 	i = i+1
 
+	#cartesian x/y = (degrees + minutes/60)
+
+#gpsCart = toCartesian(plotLink) #returns ordered pairs for graphing GPS route
+xList, yList = toCartesian(plotLink)
+
+temp = 0
+for i in xList:
+	print("(" + str(xList[temp]) + ", " + str(yList[temp]) + ")")
+	temp += 1
 
 
-print(rpm)
+#print(rpm)
 #cell_text = []
 #for i in rpm:
 #	cell_text.append([i])
@@ -58,21 +136,29 @@ print(rpm)
 
 fig = plt.figure()
 
-columns = ('RPM')
-"""plt.table(cellText = cell_text
+"""columns = ('RPM')
+plt.table(cellText = cell_text
 	, colLabels=columns
 	, loc='bottom')
 """
-ax = plt.gca() #get the current axes
-cursor = Cursor(ax, useblit=True, color='red', linewidth=2 )
+
 
 
 plt.figure(1)
 plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
-plt.plot(np.sin(1))
+plt.plot(xList, yList)
+plt.xlabel('GPS X')
+plt.ylabel('GPS Y')
+
+
 
 plt.subplot(212) #second subplot
 plt.plot(rpm)
 plt.ylabel('RPM')
-plt.xlabel('Time?')
+plt.xlabel('Time')
+
+ax = plt.gca() #get the current axes
+#create a crosshair cursor on the lower plot (not GPS)
+cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
+
 plt.show()
