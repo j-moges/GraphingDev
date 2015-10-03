@@ -179,10 +179,11 @@ host = host_subplot(212, axes_class=AA.Axes)
 
 
 
-plt.plot(rpm, color='blue', label = 'RPM')
+plt.plot(rpm, color='blue')
+host.set_ylabel('RPM', color='blue')
 ax2 = host.twinx()
 
-ax2.plot(throttlePos, color = 'green', label = 'Throttle Position')
+ax2.plot(throttlePos, color = 'green')
 #plt.plot(throttlePos, color = 'green', label = 'Throttle Position')
 #plt.ylabel('RPM')
 #plt.xlabel('Time')
