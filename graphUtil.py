@@ -4,6 +4,8 @@ from matplotlib.widgets import Cursor
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import host_subplot
+import mpl_toolkits.axisartist as AA
 
 #----------------------------------------------
 #	Function definitions - Main code below...
@@ -93,6 +95,7 @@ i = 1
 latitude = []
 longitude = []
 rpm = []
+throttlePos = []
 
 plotLink = {} #dictionary to link the mouse position in the lower plot to a dot on the GPS plot
 
@@ -110,10 +113,19 @@ while i < len(loggedData):
 	plotLink[i] = (gpsPoint + ", " + rpmDataItem) #add the GPS and RPM to the dictionary
 
 	if rpmDataItem == "":
-		rawData = 0
+		rawRPMData = 0
 	else:
-	 	rawData = int(rpmDataItem)
-	rpm.append(rawData)
+	 	rawRPMData = int(rpmDataItem)
+	rpm.append(rawRPMData)
+
+	throttleDataItem = (dataPoint[-1])
+	throttleDataItem = throttleDataItem.replace(" ", "") #eliminate whitespace, just in case
+
+	if throttleDataItem == "":
+		rawThrottleData = 0
+	else:
+		rawThrottleData = int(throttleDataItem)
+	throttlePos.append(rawThrottleData)
 	i = i+1
 
 	#cartesian x/y = (degrees + minutes/60)
@@ -121,10 +133,12 @@ while i < len(loggedData):
 #gpsCart = toCartesian(plotLink) #returns ordered pairs for graphing GPS route
 xList, yList = toCartesian(plotLink)
 
-temp = 0
-for i in xList:
-	print("(" + str(xList[temp]) + ", " + str(yList[temp]) + ")")
-	temp += 1
+#print(throttlePos)
+
+#temp = 0 #this was just to check the ordered pairs
+#for i in xList:
+	#print("(" + str(xList[temp]) + ", " + str(yList[temp]) + ")")
+	#temp += 1
 
 
 #print(rpm)
@@ -153,10 +167,35 @@ plt.ylabel('GPS Y')
 
 
 plt.subplot(212) #second subplot
-plt.plot(rpm)
-plt.ylabel('RPM')
-plt.xlabel('Time')
 
+host = host_subplot(212, axes_class=AA.Axes)
+#axisRPM = host.twinx()
+#axisThrottle = host.twinx()
+#axes = [axisRPM, axisThrottle]
+
+#multiple y axes
+#axisRPM.set_ylabel('RPM')
+#axisThrottle.set_ylabel('Throttle Position') #or axes[1].set_ylabel('Throttle Position')
+
+
+
+plt.plot(rpm, color='blue', label = 'RPM')
+ax2 = host.twinx()
+
+ax2.plot(throttlePos, color = 'green', label = 'Throttle Position')
+#plt.plot(throttlePos, color = 'green', label = 'Throttle Position')
+#plt.ylabel('RPM')
+#plt.xlabel('Time')
+
+
+ax2.set_ylabel('Throttle', color='green')
+#host.set_ylabel('RPM', color='blue')
+#for tl in host.get_yticklabels():
+#    tl.set_color('blue')
+
+#host.tick_params(axis='y')
+
+fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
 cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
