@@ -96,6 +96,8 @@ latitude = []
 longitude = []
 rpm = []
 throttlePos = []
+leanAngle = []
+speed = []
 
 plotLink = {} #dictionary to link the mouse position in the lower plot to a dot on the GPS plot
 
@@ -112,12 +114,14 @@ while i < len(loggedData):
 
 	plotLink[i] = (gpsPoint + ", " + rpmDataItem) #add the GPS and RPM to the dictionary
 
+	#RPM separation
 	if rpmDataItem == "":
 		rawRPMData = 0
 	else:
 	 	rawRPMData = int(rpmDataItem)
 	rpm.append(rawRPMData)
 
+	#Throttle Position
 	throttleDataItem = (dataPoint[-1])
 	throttleDataItem = throttleDataItem.replace(" ", "") #eliminate whitespace, just in case
 
@@ -126,6 +130,30 @@ while i < len(loggedData):
 	else:
 		rawThrottleData = int(throttleDataItem)
 	throttlePos.append(rawThrottleData)
+	#End Throttle position
+
+	#Lean Angle
+	leanAngleItem = (dataPoint[-3])
+	leanAngleItem = leanAngleItem.replace(" ", "")
+
+	if leanAngleItem == "":
+		rawLeanAngle = 0
+	else:
+		rawLeanAngle = float(leanAngleItem)
+	leanAngle.append(rawLeanAngle)
+	#END lean angle
+
+	#Speed
+	speedItem = (dataPoint[-4])
+	speedItem = speedItem.replace(" ", "")
+
+	if speedItem == "":
+		rawSpeed = 0
+	else:
+		rawSpeed = float(speedItem)
+	speed.append(rawSpeed)
+	#END Speed
+
 	i = i+1
 
 	#cartesian x/y = (degrees + minutes/60)
@@ -133,7 +161,17 @@ while i < len(loggedData):
 #gpsCart = toCartesian(plotLink) #returns ordered pairs for graphing GPS route
 xList, yList = toCartesian(plotLink)
 
-#print(throttlePos)
+#make a dictionary of points to use for the dot on the GPS plot
+gpsDots = {}
+i = 0
+while i < len(xList):
+	gpsDots[i] = xList[i], yList[i]
+	i = i + 1
+
+#print(gpsDots)
+
+
+#print(speed)
 
 #temp = 0 #this was just to check the ordered pairs
 #for i in xList:
@@ -148,14 +186,15 @@ xList, yList = toCartesian(plotLink)
 #print('-------------------------')
 #print(cell_text)
 
+
+#-----------------------------------------
+#                                        -
+#		   START PLOTTING                -
+#                                        -  
+#-----------------------------------------
+
+
 fig = plt.figure()
-
-"""columns = ('RPM')
-plt.table(cellText = cell_text
-	, colLabels=columns
-	, loc='bottom')
-"""
-
 
 
 plt.figure(1)
@@ -163,33 +202,27 @@ plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first 
 plt.plot(xList, yList)
 plt.xlabel('GPS X')
 plt.ylabel('GPS Y')
+plt.axis('off') #turn off axes for the GPS plot
 
 
 
 plt.subplot(212) #second subplot
 
 host = host_subplot(212, axes_class=AA.Axes)
-#axisRPM = host.twinx()
-#axisThrottle = host.twinx()
-#axes = [axisRPM, axisThrottle]
-
-#multiple y axes
-#axisRPM.set_ylabel('RPM')
-#axisThrottle.set_ylabel('Throttle Position') #or axes[1].set_ylabel('Throttle Position')
 
 
-
+plt.xlabel('Time')
 plt.plot(rpm, color='blue')
 host.set_ylabel('RPM', color='blue')
+
+
 ax2 = host.twinx()
 
-ax2.plot(throttlePos, color = 'green')
-#plt.plot(throttlePos, color = 'green', label = 'Throttle Position')
-#plt.ylabel('RPM')
-#plt.xlabel('Time')
 
+ax2.plot(throttlePos, color = 'green')
 
 ax2.set_ylabel('Throttle', color='green')
+
 #host.set_ylabel('RPM', color='blue')
 #for tl in host.get_yticklabels():
 #    tl.set_color('blue')
@@ -200,5 +233,43 @@ fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
 cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
+
+#def onclick(event):
+#	if event.inaxes:
+#		print(event.xdata)
+
+
+"""def on_move(event):
+		#gets the x coordinate from the mouse which corresponds with the index
+	#in the GPS list
+	mouseX = int(event.xdata) 
+	plt.subplot(211)
+	#plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
+	print(mouseX)"""
+
+def enter_axes(event):
+    print('enter_axes', event.inaxes)
+    mouseX = int(event.xdata)
+    print(mouseX)
+    plt.subplot(211)
+    plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
+    #event.inaxes.patch.set_facecolor('yellow')
+    event.canvas.draw()
+
+def leave_axes(event):
+    print('leave_axes', event.inaxes)
+    #event.inaxes.patch.set_facecolor('white')
+    event.canvas.draw()
+
+
+
+#fig.canvas.mpl_connect('motion_notify_event', on_move)
+fig.canvas.mpl_connect('axes_enter_event', enter_axes)
+fig.canvas.mpl_connect('axes_leave_event', leave_axes)
+
+
+
+
+
 
 plt.show()
