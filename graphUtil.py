@@ -199,7 +199,7 @@ fig = plt.figure()
 
 plt.figure(1)
 plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
-plt.plot(xList, yList)
+originalGPSPlot = plt.plot(xList, yList)
 plt.xlabel('GPS X')
 plt.ylabel('GPS Y')
 plt.axis('off') #turn off axes for the GPS plot
@@ -239,25 +239,31 @@ cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
 #		print(event.xdata)
 
 
-"""def on_move(event):
-		#gets the x coordinate from the mouse which corresponds with the index
-	#in the GPS list
-	mouseX = int(event.xdata) 
-	plt.subplot(211)
-	#plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
-	print(mouseX)"""
+def on_move(event):
+	#get the X coordinate which corresponds to the index in the GPS coordinates
+	#handle mouse event problems...Work-around because I couldn't get the event
+	#to only trigger on the lower plot
+	if event.xdata != None and (event.xdata >= 0 and event.xdata <= len(xList)):
+		mouseX = int(event.xdata)
+		plt.subplot(211)
+		#plt.clear()
+		plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
+		plt.draw()
+		#print(mouseX)
+
 
 def enter_axes(event):
-    print('enter_axes', event.inaxes)
-    mouseX = int(event.xdata)
-    print(mouseX)
-    plt.subplot(211)
-    plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
+	fig.canvas.mpl_connect('motion_notify_event', on_move)
+    #print('enter_axes', event.inaxes)
+    #mouseX = int(event.xdata)
+    #print(mouseX)
+    #plt.subplot(211)
+    #plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
     #event.inaxes.patch.set_facecolor('yellow')
-    event.canvas.draw()
+	event.canvas.draw()
 
 def leave_axes(event):
-    print('leave_axes', event.inaxes)
+    #print('leave_axes', event.inaxes)
     #event.inaxes.patch.set_facecolor('white')
     event.canvas.draw()
 
