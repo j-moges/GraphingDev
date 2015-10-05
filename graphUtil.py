@@ -193,17 +193,25 @@ while i < len(xList):
 #                                        -  
 #-----------------------------------------
 
+def gpsPlot():
+	plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
+	originalGPSPlot = plt.plot(xList, yList)
+	plt.xlabel('GPS X')
+	plt.ylabel('GPS Y')
+	plt.axis('off') #turn off axes for the GPS plot	
+
 
 fig = plt.figure()
 
 
 plt.figure(1)
-plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
+"""plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
 originalGPSPlot = plt.plot(xList, yList)
 plt.xlabel('GPS X')
 plt.ylabel('GPS Y')
 plt.axis('off') #turn off axes for the GPS plot
-
+"""
+gpsPlot()
 
 
 plt.subplot(212) #second subplot
@@ -243,6 +251,8 @@ def on_move(event):
 	#get the X coordinate which corresponds to the index in the GPS coordinates
 	#handle mouse event problems...Work-around because I couldn't get the event
 	#to only trigger on the lower plot
+	plt.subplot(211).clear()
+	gpsPlot()
 	if event.xdata != None and (event.xdata >= 0 and event.xdata <= len(xList)):
 		mouseX = int(event.xdata)
 		plt.subplot(211)
