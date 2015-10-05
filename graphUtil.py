@@ -29,7 +29,6 @@ def toCartesian(dictOfPoints):
 	#now separate the latitude and longitude, do the math, and store in x and y
 	for val in latLon:
 		temp = val.split(" ")
-		#print(temp)
 		#latitude manipulation
 		if "+" in temp[0]:
 			latDeg = temp[0][1:]
@@ -47,8 +46,6 @@ def toCartesian(dictOfPoints):
 		if "-" in temp[2]:
 			lonDeg = temp[2][1:]
 			int(lonDeg)
-			#print(lonDeg)
-			#lonDeg = (-lonDeg)
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
 		lat = float(latDeg) + (latMin / 60)
@@ -59,11 +56,9 @@ def toCartesian(dictOfPoints):
 		yStr = y[-1]
 		point = str(xStr) + ", " + str(yStr)
 		points.append(point)
-	#print(points)
 	return x, y
 
 
-	#print(latLon)
 
 
 #-------------------------------------------------------------------
@@ -86,9 +81,6 @@ lineData = []
 #get rid of \n and create a list for each set of values
 loggedData = [i.split('\n') for i in loggedData]
 
-#print('-------------------')
-#print(loggedData[-1][0])
-#print('-----------------')
 
 i = 1
 
@@ -168,24 +160,6 @@ while i < len(xList):
 	gpsDots[i] = xList[i], yList[i]
 	i = i + 1
 
-#print(gpsDots)
-
-
-#print(speed)
-
-#temp = 0 #this was just to check the ordered pairs
-#for i in xList:
-	#print("(" + str(xList[temp]) + ", " + str(yList[temp]) + ")")
-	#temp += 1
-
-
-#print(rpm)
-#cell_text = []
-#for i in rpm:
-#	cell_text.append([i])
-#print('-------------------------')
-#print(cell_text)
-
 
 #-----------------------------------------
 #                                        -
@@ -193,6 +167,9 @@ while i < len(xList):
 #                                        -  
 #-----------------------------------------
 
+
+#Small function to make it easier to clear the GPS plot of red dots
+#This function simply creates the GPS plot 
 def gpsPlot():
 	plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
 	originalGPSPlot = plt.plot(xList, yList)
@@ -205,12 +182,7 @@ fig = plt.figure()
 
 
 plt.figure(1)
-"""plt.subplot(211) #create a 2 row by 1 column set of subplots (this is the first subplot)
-originalGPSPlot = plt.plot(xList, yList)
-plt.xlabel('GPS X')
-plt.ylabel('GPS Y')
-plt.axis('off') #turn off axes for the GPS plot
-"""
+#plot the GPS 
 gpsPlot()
 
 
@@ -228,24 +200,20 @@ ax2 = host.twinx()
 
 
 ax2.plot(throttlePos, color = 'green')
-
 ax2.set_ylabel('Throttle', color='green')
 
-#host.set_ylabel('RPM', color='blue')
-#for tl in host.get_yticklabels():
-#    tl.set_color('blue')
-
-#host.tick_params(axis='y')
 
 fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
 cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
 
-#def onclick(event):
-#	if event.inaxes:
-#		print(event.xdata)
 
+#-------------------------------------------------
+
+#	EVENT HANDLING STUFF - For mouse movement
+
+#-------------------------------------------------
 
 def on_move(event):
 	#get the X coordinate which corresponds to the index in the GPS coordinates
@@ -256,36 +224,22 @@ def on_move(event):
 	if event.xdata != None and (event.xdata >= 0 and event.xdata <= len(xList)):
 		mouseX = int(event.xdata)
 		plt.subplot(211)
-		#plt.clear()
 		plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
 		plt.draw()
-		#print(mouseX)
 
 
+#Supposed to enter the bottom axes and trigger the on_move event to
+#track the GPS dot.  That's not what ends up happening, but it works...
 def enter_axes(event):
 	fig.canvas.mpl_connect('motion_notify_event', on_move)
-    #print('enter_axes', event.inaxes)
-    #mouseX = int(event.xdata)
-    #print(mouseX)
-    #plt.subplot(211)
-    #plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
-    #event.inaxes.patch.set_facecolor('yellow')
 	event.canvas.draw()
 
 def leave_axes(event):
-    #print('leave_axes', event.inaxes)
-    #event.inaxes.patch.set_facecolor('white')
     event.canvas.draw()
 
 
-
-#fig.canvas.mpl_connect('motion_notify_event', on_move)
+#event handlers that end up not really doing anything
 fig.canvas.mpl_connect('axes_enter_event', enter_axes)
 fig.canvas.mpl_connect('axes_leave_event', leave_axes)
-
-
-
-
-
 
 plt.show()
