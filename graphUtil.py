@@ -186,22 +186,47 @@ plt.figure(1)
 gpsPlot()
 
 
-plt.subplot(212) #second subplot
+#plt.subplot(212) #second subplot <commenting out got rid of duplicate values overlapping...
 
-host = host_subplot(212, axes_class=AA.Axes)
+#Set up axes variables
+host = host_subplot(212, axes_class=AA.Axes) #RPM
+ax2 = host.twinx() #Throttle Position
+ax3 = host.twinx() #Lean Angle
+ax4 = host.twinx() #Speed (MPH)
+
+offset = 60 #offset beween axes
+
+new_fixed_axis = host.get_grid_helper().new_fixed_axis
+host.axis['left'] = new_fixed_axis(loc='left', axes=host, offset=(0, 0))
+ax2.axis['right'] = new_fixed_axis(loc='right', axes=ax2, offset=(0, 0))
+ax3.axis['left'] = new_fixed_axis(loc='left', axes=ax3, offset=(-offset, 0))
+ax4.axis['right'] = new_fixed_axis(loc='right', axes=ax4, offset=(offset, 0))
+
+#not sure this block does anything at all
+host.axis['left'].toggle(all=True)
+ax2.axis['right'].toggle(all=True)
+ax3.axis['left'].toggle(all=True)
+#ax3.axis['right'].toggle(ticklabels=False)
+ax4.axis['right'].toggle(all=True)
 
 
-plt.xlabel('Time')
-plt.plot(rpm, color='blue')
+host.set_xlabel('Time')
 host.set_ylabel('RPM', color='blue')
-
-
-ax2 = host.twinx()
-
-
-ax2.plot(throttlePos, color = 'green')
 ax2.set_ylabel('Throttle', color='green')
+ax3.set_ylabel('Lean Angle', color = 'orange')
+ax4.set_ylabel('Speed (MPH)', color = 'red')
 
+
+#get tuple of the ticks for each plot???
+hostTicks, = host.plot(rpm, color='blue', label = 'RPM')
+ax2Ticks, = ax2.plot(throttlePos, color = 'green', label = 'Throttle Position')
+ax3Ticks, = ax3.plot(leanAngle, color = 'orange', label = 'Lean Angle')
+ax4Ticks, = ax4.plot(speed, color = 'red', label = 'Speed (MPH)')
+
+#Turn off all axis stuff for the lean angle on the right
+#without this the lean angle y axis would be duplicated and overlap the 
+#throttle on the right side
+ax3.axis['right'].toggle(all=False)
 
 fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
