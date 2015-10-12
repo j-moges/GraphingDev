@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
+from matplotlib.widgets import Button
+from xml.etree.ElementTree import Element
 
 #----------------------------------------------
 #	Function definitions - Main code below...
@@ -186,8 +188,6 @@ plt.figure(1)
 gpsPlot()
 
 
-#plt.subplot(212) #second subplot <commenting out got rid of duplicate values overlapping...
-
 #Set up axes variables
 host = host_subplot(212, axes_class=AA.Axes) #RPM
 ax2 = host.twinx() #Throttle Position
@@ -231,7 +231,14 @@ ax3.axis['right'].toggle(all=False)
 fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
+#OLD CROSSHAIR
 cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
+
+
+
+
+
+
 
 
 #-------------------------------------------------
@@ -266,5 +273,32 @@ def leave_axes(event):
 #event handlers that end up not really doing anything
 fig.canvas.mpl_connect('axes_enter_event', enter_axes)
 fig.canvas.mpl_connect('axes_leave_event', leave_axes)
+
+
+
+#Building KML File
+class Kml:
+	def toKML(self, event):
+		print("TO KML")
+		"""E = Element()
+		ROOT = E.kml
+		PLACEMARK = E.placemark
+		NAME = E.name
+		POINT = E.point
+		COORDS = E.coordinates
+		kmlFile = ROOT(
+					PLACEMARK(
+						NAME('Test Name'),
+						POINT(
+							COORDS()
+						)
+					)
+				)
+		print(lxml.etree.tostring(kmlFile, pretty_print=True))"""
+
+btn = plt.axes([0.8, 0.05, 0.1, 0.075])
+callback = Kml()
+toKMLButton = Button(btn, "GPS to KML")
+toKMLButton.on_clicked(callback.toKML)
 
 plt.show()
