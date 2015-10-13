@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
 from matplotlib.widgets import Button
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, SubElement
 
 #----------------------------------------------
 #	Function definitions - Main code below...
@@ -233,7 +233,7 @@ ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
 #OLD CROSSHAIR
 cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
-
+plt.xlim(0, 500)
 
 
 
@@ -280,13 +280,14 @@ fig.canvas.mpl_connect('axes_leave_event', leave_axes)
 class Kml:
 	def toKML(self, event):
 		print("TO KML")
-		"""E = Element()
-		ROOT = E.kml
-		PLACEMARK = E.placemark
-		NAME = E.name
-		POINT = E.point
-		COORDS = E.coordinates
-		kmlFile = ROOT(
+		XMLVER = Element('?xml version="1.0" encoding="UTF-8"?')
+		ROOT = Element('kml xmlns="http://www.opengis.net/kml/2.2')
+		PLACEMARK = ROOT.SubElement(ROOT, 'Placemark')
+		#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
+		POINT = PLACEMARK.SubElement(PLACEMARK, 'Point')
+		COORDS = POINT.SubElement(POINT, 'coordinates')
+		ET.dump(XMLVER)
+		"""kmlFile = ROOT(
 					PLACEMARK(
 						NAME('Test Name'),
 						POINT(
