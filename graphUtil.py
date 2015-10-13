@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
 from matplotlib.widgets import Button
-from xml.etree.ElementTree import Element, SubElement
+from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import SubElement
 
 #----------------------------------------------
 #	Function definitions - Main code below...
@@ -232,7 +234,12 @@ fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
 #OLD CROSSHAIR
-cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
+#cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
+
+
+
+
+
 plt.xlim(0, 500) #limit the x axis to 500 data points at a time
 #dataPlot = fig.subplot(212)
 fig.suptitle("Use the 'Pan Axes' button to move the dataplot left and right")
@@ -248,7 +255,7 @@ fig.suptitle("Use the 'Pan Axes' button to move the dataplot left and right")
 
 #-------------------------------------------------
 
-def on_move(event):
+"""def on_move(event):
 	#get the X coordinate which corresponds to the index in the GPS coordinates
 	#handle mouse event problems...Work-around because I couldn't get the event
 	#to only trigger on the lower plot
@@ -270,10 +277,48 @@ def enter_axes(event):
 def leave_axes(event):
     event.canvas.draw()
 
+"""
 
+
+
+#	END OLD CURSOR
+
+
+"""
+
+					NEW CURSOR
+
+
+"""
+class Cursor:
+    def __init__(self, ax):
+        self.ax = ax
+        self.lx = ax.axhline(color='k')  # the horiz line
+        self.ly = ax.axvline(color='k')  # the vert line
+
+        # text location in axes coords
+        self.txt = ax.text( 0.7, 0.9, '', transform=ax.transAxes)
+
+    def mouse_move(self, event):
+        if not event.inaxes: return
+
+        x, y = event.xdata, event.ydata
+        # update the line positions
+        self.lx.set_ydata(y )
+        self.ly.set_xdata(x )
+
+        #self.txt.set_text( 'x=%1.2f, y=%1.2f'%(x,y) )
+        plt.draw()
+
+#NEW CURSOR EVENTS
+cursor = Cursor(ax)
+#cursor = SnaptoCursor(ax, t, s)
+fig.canvas.mpl_connect('motion_notify_event', cursor.mouse_move)
+
+#OLD CURSOR EVENTS
 #event handlers that end up not really doing anything
-fig.canvas.mpl_connect('axes_enter_event', enter_axes)
-fig.canvas.mpl_connect('axes_leave_event', leave_axes)
+#fig.canvas.mpl_connect('axes_enter_event', enter_axes)
+#fig.canvas.mpl_connect('axes_leave_event', leave_axes)
 
 
 
@@ -288,6 +333,7 @@ class Kml:
 		POINT = PLACEMARK.SubElement(PLACEMARK, 'Point')
 		COORDS = POINT.SubElement(POINT, 'coordinates')
 		ET.dump(XMLVER)
+		#ET.dump(ROOT)
 		"""kmlFile = ROOT(
 					PLACEMARK(
 						NAME('Test Name'),
