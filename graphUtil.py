@@ -233,8 +233,9 @@ ax = plt.gca() #get the current axes
 #create a crosshair cursor on the lower plot (not GPS)
 #OLD CROSSHAIR
 cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
-plt.xlim(0, 500)
-
+plt.xlim(0, 500) #limit the x axis to 500 data points at a time
+#dataPlot = fig.subplot(212)
+fig.suptitle("Use the 'Pan Axes' button to move the dataplot left and right")
 
 
 
@@ -297,7 +298,9 @@ class Kml:
 				)
 		print(lxml.etree.tostring(kmlFile, pretty_print=True))"""
 
-btn = plt.axes([0.8, 0.05, 0.1, 0.075])
+btn = plt.axes([0.5, 0.5, 0.1, 0.075]) #place the button roughly in the middle of the screen
+#btn = host.axes()
+
 callback = Kml()
 toKMLButton = Button(btn, "GPS to KML")
 toKMLButton.on_clicked(callback.toKML)
