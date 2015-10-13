@@ -351,10 +351,11 @@ class Kml:
 		PLACEMARK = ET.SubElement(DOCUMENT, 'Placemark')
 			#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
 		LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
-		COORDS = ET.SubElement(LINESTRING, 'coordinates')
+		
 		
 		for index, point in enumerate(kmlCoordinates):
 			print(point)
+			COORDS = ET.SubElement(LINESTRING, 'coordinates')
 			COORDS.text = point
 		#ET.dump(XMLVER)
 		#rootString = ET.dump(ROOT)
