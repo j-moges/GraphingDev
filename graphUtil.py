@@ -3,6 +3,7 @@ from tkinter import filedialog
 from matplotlib.widgets import Cursor
 import sys
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
@@ -15,7 +16,9 @@ from xml.etree.ElementTree import SubElement
 #	Function definitions - Main code below...
 #----------------------------------------------
 
+
 def toCartesian(dictOfPoints):
+	kmlCoords(dictOfPoints) #call the other function to format for KML
 	#using GPS coordinates in DDM format from file
 	x = []
 	y = []
@@ -50,6 +53,7 @@ def toCartesian(dictOfPoints):
 		if "-" in temp[2]:
 			lonDeg = temp[2][1:]
 			int(lonDeg)
+			lonDeg = ("-" + lonDeg)
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
 		lat = float(latDeg) + (latMin / 60)
@@ -61,6 +65,61 @@ def toCartesian(dictOfPoints):
 		point = str(xStr) + ", " + str(yStr)
 		points.append(point)
 	return x, y
+
+kmlCoordinates = []
+
+#works with the coordinates to use in Google Earth
+def kmlCoords(dictOfPoints):
+	latLon = []
+	kmlLat = []
+	kmlLon = []
+	latDeg = 0
+	lonDeg = 0
+	latMin = 0
+	lonMin = 0
+	lat = 0.0
+	lon = 0.0
+	for val in dictOfPoints:
+		latLon.append(dictOfPoints[val].split(",")[0])
+	for val in latLon:
+		temp = val.split(" ")
+		#latitude manipulation
+		if "+" in temp[0]:
+			latDeg = temp[0][1:]
+			int(latDeg) #make sure it's an int
+		if "-" in temp[0]:
+			latDeg = temp[0][1:]
+			int(latDeg) #make sure it's an int
+			latDeg = (-latDeg)
+		latMin = float(temp[1][:-1]) #get rid of N/S
+
+		#longitude
+		if "+" in temp[2]:
+			lonDeg = temp[2][1:]
+			int(lonDeg)
+		if "-" in temp[2]:
+			lonDeg = temp[2][1:]
+			int(lonDeg)
+			lonDeg = ("-" + lonDeg)
+		lonMin = float(temp[3][:-1]) #get rid of E/W
+		kmlLat.append(str(latDeg) + " " + str(latMin))
+		kmlLon.append(str(lonDeg) + " " + str(lonMin))
+	i = 0
+	while i < len(kmlLon):
+		kmlCoordinates.append(kmlLat[i] + ", " + kmlLon[i])
+		i = i+1
+	#print(kmlCoordinates)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -241,7 +300,7 @@ ax = plt.gca() #get the current axes
 
 
 plt.xlim(0, 500) #limit the x axis to 500 data points at a time
-#dataPlot = fig.subplot(212)
+
 fig.suptitle("Use the 'Pan Axes' button to move the dataplot left and right")
 
 
@@ -255,41 +314,6 @@ fig.suptitle("Use the 'Pan Axes' button to move the dataplot left and right")
 
 #-------------------------------------------------
 
-"""def on_move(event):
-	#get the X coordinate which corresponds to the index in the GPS coordinates
-	#handle mouse event problems...Work-around because I couldn't get the event
-	#to only trigger on the lower plot
-	plt.subplot(211).clear()
-	gpsPlot()
-	if event.xdata != None and (event.xdata >= 0 and event.xdata <= len(xList)):
-		mouseX = int(event.xdata)
-		plt.subplot(211)
-		plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1)
-		plt.draw()
-
-
-#Supposed to enter the bottom axes and trigger the on_move event to
-#track the GPS dot.  That's not what ends up happening, but it works...
-def enter_axes(event):
-	fig.canvas.mpl_connect('motion_notify_event', on_move)
-	event.canvas.draw()
-
-def leave_axes(event):
-    event.canvas.draw()
-
-"""
-
-
-
-#	END OLD CURSOR
-
-
-"""
-
-					NEW CURSOR
-
-
-"""
 class Cursor:
     def __init__(self, ax):
         self.ax = ax
@@ -306,43 +330,41 @@ class Cursor:
         # update the line positions
         self.lx.set_ydata(y )
         self.ly.set_xdata(x )
-
         #self.txt.set_text( 'x=%1.2f, y=%1.2f'%(x,y) )
         plt.draw()
 
 #NEW CURSOR EVENTS
 cursor = Cursor(ax)
-#cursor = SnaptoCursor(ax, t, s)
 fig.canvas.mpl_connect('motion_notify_event', cursor.mouse_move)
-
-#OLD CURSOR EVENTS
-#event handlers that end up not really doing anything
-#fig.canvas.mpl_connect('axes_enter_event', enter_axes)
-#fig.canvas.mpl_connect('axes_leave_event', leave_axes)
 
 
 
 #Building KML File
 class Kml:
 	def toKML(self, event):
-		print("TO KML")
-		XMLVER = Element('?xml version="1.0" encoding="UTF-8"?')
-		ROOT = Element('kml xmlns="http://www.opengis.net/kml/2.2')
-		PLACEMARK = ROOT.SubElement(ROOT, 'Placemark')
-		#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
-		POINT = PLACEMARK.SubElement(PLACEMARK, 'Point')
-		COORDS = POINT.SubElement(POINT, 'coordinates')
-		ET.dump(XMLVER)
-		#ET.dump(ROOT)
-		"""kmlFile = ROOT(
-					PLACEMARK(
-						NAME('Test Name'),
-						POINT(
-							COORDS()
-						)
-					)
-				)
-		print(lxml.etree.tostring(kmlFile, pretty_print=True))"""
+		#print("TO KML")
+		XMLVER = ET.Element('?xml version="1.0" encoding="UTF-8"?')
+		ROOT = ET.Element('kml')
+		ROOT.set('xmlns', 'http://www.opengis.net/kml/2.2')
+		DOCUMENT = ET.SubElement(ROOT, 'Document')
+		#for point in plotLink:
+		PLACEMARK = ET.SubElement(DOCUMENT, 'Placemark')
+			#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
+		LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
+		COORDS = ET.SubElement(LINESTRING, 'coordinates')
+		
+		for index, point in enumerate(kmlCoordinates):
+			print(point)
+			COORDS.text = point
+		#ET.dump(XMLVER)
+		#rootString = ET.dump(ROOT)
+		#kmlOutput = open('kmlOutput.kml', 'w')
+		#kmlOutput.write('<?xml version="1.0" encoding="UTF-8"?>')
+		#kmlOutput.write(ET.tostring(ROOT))
+		#kmlOutput.close()
+		tree = ET.ElementTree(ROOT)
+		tree.write("UNIQUEname.kml")
+
 
 btn = plt.axes([0.5, 0.5, 0.1, 0.075]) #place the button roughly in the middle of the screen
 #btn = host.axes()
