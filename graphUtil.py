@@ -53,7 +53,6 @@ def toCartesian(dictOfPoints):
 		if "-" in temp[2]:
 			lonDeg = temp[2][1:]
 			int(lonDeg)
-			lonDeg = ("-" + lonDeg)
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
 		lat = float(latDeg) + (latMin / 60)
@@ -325,13 +324,17 @@ class Cursor:
 
     def mouse_move(self, event):
         if not event.inaxes: return
-
-        x, y = event.xdata, event.ydata
-        # update the line positions
-        self.lx.set_ydata(y )
-        self.ly.set_xdata(x )
-        #self.txt.set_text( 'x=%1.2f, y=%1.2f'%(x,y) )
-        plt.draw()
+        #establish use of the GPS plot again or dots will draw on the 'GPS to file' button
+        plt.subplot(211).clear()
+        gpsPlot()
+        if event.xdata != None and (event.xdata >= 0 and event.xdata <= len(xList)):
+        	x, y = event.xdata, event.ydata
+        	mouseX = int(event.xdata)
+        	# update the line positions
+        	self.lx.set_ydata(y )
+        	self.ly.set_xdata(x )
+        	plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1) #GPS Dot
+        	plt.draw()
 
 #NEW CURSOR EVENTS
 cursor = Cursor(ax)
@@ -344,19 +347,22 @@ class Kml:
 	def toKML(self, event):
 		#print("TO KML")
 		XMLVER = ET.Element('?xml version="1.0" encoding="UTF-8"?')
-		ROOT = ET.Element('kml')
-		ROOT.set('xmlns', 'http://www.opengis.net/kml/2.2')
-		DOCUMENT = ET.SubElement(ROOT, 'Document')
+		ROOT = ET.Element('gpx')
+		ROOT.set('version', '1.0')
+		
+		TRACK = ET.SubElement(ROOT, 'trk')
+		NAME = ET.SubElement(TRACK, 'name')
+		NAME.text = 'GPX Track'
 		#for point in plotLink:
-		PLACEMARK = ET.SubElement(DOCUMENT, 'Placemark')
+		TRACKSEG = ET.SubElement(TRACK, 'trkseg')
 			#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
-		LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
+		#LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
 		
 		
 		for index, point in enumerate(kmlCoordinates):
 			print(point)
-			COORDS = ET.SubElement(LINESTRING, 'coordinates')
-			COORDS.text = point
+			TRACKPOINT = ET.SubElement(TRACKSEG, 'trkpt')
+			TRACKPOINT.text = point
 		#ET.dump(XMLVER)
 		#rootString = ET.dump(ROOT)
 		#kmlOutput = open('kmlOutput.kml', 'w')
@@ -364,7 +370,7 @@ class Kml:
 		#kmlOutput.write(ET.tostring(ROOT))
 		#kmlOutput.close()
 		tree = ET.ElementTree(ROOT)
-		tree.write("UNIQUEname.kml")
+		tree.write("UNIQUEname.gpx")
 
 
 btn = plt.axes([0.5, 0.5, 0.1, 0.075]) #place the button roughly in the middle of the screen
