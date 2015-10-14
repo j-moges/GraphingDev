@@ -290,17 +290,13 @@ ax3.axis['right'].toggle(all=False)
 
 fig.subplots_adjust(hspace=.5) #spacing between the plots
 ax = plt.gca() #get the current axes
-#create a crosshair cursor on the lower plot (not GPS)
-#OLD CROSSHAIR
-#cursor = Cursor(ax, useblit=True, color='red', linewidth=1 )
-
-
 
 
 
 plt.xlim(0, 500) #limit the x axis to 500 data points at a time
 
-fig.suptitle("Use the 'Pan Axes' button to move the dataplot left and right")
+fig.suptitle("Use the 'Pan Axes' button to move the data plot left and right", 
+	fontweight='bold')
 
 
 
