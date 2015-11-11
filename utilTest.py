@@ -1,6 +1,7 @@
 import unittest
 from graphUtil import toCartesian
 
+#Unit test for ensuring GPS coordinates are within range
 class TestFunctions(unittest.TestCase):
 
 	def test_toCartesian(self):
