@@ -18,10 +18,12 @@ from xml.etree.ElementTree import SubElement
 
 
 def toCartesian(dictOfPoints):
-	kmlCoords(dictOfPoints) #call the other function to format for KML
+	#kmlCoords(dictOfPoints) #call the other function to format for KML
 	#using GPS coordinates in DDM format from file
 	x = []
 	y = []
+	xGraph = []
+	yGraph = []
 	points = []
 	latLon = []
 	latDeg = 0
@@ -55,8 +57,12 @@ def toCartesian(dictOfPoints):
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
 
-		#lat = float(latDeg) + (latMin / 60)
-		#lon = float(lonDeg) + (lonMin / 60)
+
+		#formatted to display the graph properly
+		latGraph = float(latDeg) + (latMin / 60)
+		lonGraph = float(lonDeg) + (lonMin / 60)
+
+		#below is formatting to get the correct Latitude and Longitude for Google Earth
 		#If the coordinate is negative, subtract to get the correct final coordinate
 		if latDeg < 0:
 			lat = float(latDeg) - (latMin / 60)
@@ -69,27 +75,31 @@ def toCartesian(dictOfPoints):
 			lon = float(lonDeg) + (lonMin / 60)
 		
 
-
+		#Error checking
 		if (lat > 90.0) or (lat < -90.0):
 			raise ValueError("Latitude value out of range " + str(lat))
-			#	print("Latitude value out of range")
 
 		if (lon > 180.0) or (lon < -180.0):
 			raise ValueError("Longitude value out of range " + str(lon))
-			#	print("Longitude value out of range")
 
+		#xGraph and yGraph are for plotting
+		xGraph.append(latGraph)
+		yGraph.append(lonGraph)
+		#x and y are for GPX file
 		x.append(lat)
 		y.append(lon)
 		xStr = x[-1]
 		yStr = y[-1]
 		point = str(xStr) + ", " + str(yStr)
 		points.append(point)
-	return x, y
+		#print(y)
+	#print(xGraph)
+	return x, y, xGraph, yGraph
 
 kmlCoordinates = []
 
 #works with the coordinates to use in Google Earth
-def kmlCoords(dictOfPoints):
+"""def kmlCoords(dictOfPoints):
 	latLon = []
 	kmlLat = []
 	kmlLon = []
@@ -127,6 +137,7 @@ def kmlCoords(dictOfPoints):
 	while i < len(kmlLon):
 		kmlCoordinates.append(kmlLat[i] + ", " + kmlLon[i])
 		i = i+1
+	print(kmlCoordinates)"""
 
 #formats the coordinates given in the bottom right corner of the figure when
 #you mouse over the bottom plot
@@ -231,13 +242,14 @@ def main():
 		#cartesian x/y = (degrees + minutes/60)
 
 	#gpsCart = toCartesian(plotLink) #returns ordered pairs for graphing GPS route
-	xList, yList = toCartesian(plotLink)
+	gpxLat, gpxLong, xList, yList = toCartesian(plotLink)
+	#print(xList)
 
 	#make a dictionary of points to use for the dot on the GPS plot
 	gpsDots = {}
 	i = 0
-	while i < len(xList):
-		gpsDots[i] = xList[i], yList[i]
+	while i < len(gpxLat):
+		gpsDots[i] = gpxLat[i], gpxLong[i]
 		i = i + 1
 
 
@@ -365,7 +377,7 @@ def main():
 			NAME.text = 'GPX Track'
 			#for point in plotLink:
 			TRACKSEG = ET.SubElement(TRACK, 'trkseg')
-				#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
+			#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
 			#LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
 			#print(gpsDots)
 
@@ -389,7 +401,7 @@ def main():
 	btn = plt.axes([0.5, 0.5, 0.1, 0.075]) #place the button roughly in the middle of the screen
 
 	callback = Kml()
-	toKMLButton = Button(btn, "GPS to KML")
+	toKMLButton = Button(btn, "GPS to GPX File")
 	toKMLButton.on_clicked(callback.toKML)
 
 	ax.format_coord = format_coord
