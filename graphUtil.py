@@ -18,7 +18,6 @@ from xml.etree.ElementTree import SubElement
 
 
 def toCartesian(dictOfPoints):
-	#kmlCoords(dictOfPoints) #call the other function to format for KML
 	#using GPS coordinates in DDM format from file
 	x = []
 	y = []
@@ -57,7 +56,6 @@ def toCartesian(dictOfPoints):
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
 
-
 		#formatted to display the graph properly
 		latGraph = float(latDeg) + (latMin / 60)
 		lonGraph = float(lonDeg) + (lonMin / 60)
@@ -92,52 +90,8 @@ def toCartesian(dictOfPoints):
 		yStr = y[-1]
 		point = str(xStr) + ", " + str(yStr)
 		points.append(point)
-		#print(y)
-	#print(xGraph)
 	return x, y, xGraph, yGraph
 
-kmlCoordinates = []
-
-#works with the coordinates to use in Google Earth
-"""def kmlCoords(dictOfPoints):
-	latLon = []
-	kmlLat = []
-	kmlLon = []
-	latDeg = 0
-	lonDeg = 0
-	latMin = 0
-	lonMin = 0
-	lat = 0.0
-	lon = 0.0
-	for val in dictOfPoints:
-		latLon.append(dictOfPoints[val].split(",")[0])
-	for val in latLon:
-		temp = val.split(" ")
-		#latitude manipulation
-		if "+" in temp[0]:
-			latDeg = temp[0][1:]
-			int(latDeg) #make sure it's an int
-		if "-" in temp[0]:
-			latDeg = temp[0][1:]
-			latDeg = (-(int(latDeg))) #make sure it's an int
-		latMin = float(temp[1][:-1]) #get rid of N/S
-
-		#longitude
-		if "+" in temp[2]:
-			lonDeg = temp[2][1:]
-			int(lonDeg)
-		if "-" in temp[2]:
-			lonDeg = temp[2][1:]
-			int(lonDeg)
-			lonDeg = ("-" + lonDeg)
-		lonMin = float(temp[3][:-1]) #get rid of E/W
-		kmlLat.append(str(latDeg) + " " + str(latMin))
-		kmlLon.append(str(lonDeg) + " " + str(lonMin))
-	i = 0
-	while i < len(kmlLon):
-		kmlCoordinates.append(kmlLat[i] + ", " + kmlLon[i])
-		i = i+1
-	print(kmlCoordinates)"""
 
 #formats the coordinates given in the bottom right corner of the figure when
 #you mouse over the bottom plot
@@ -147,7 +101,7 @@ def format_coord(x, y):
 	fc_throttle = 0
 	fc_leanAngle = 0
 	fc_speed = 0
-	return ("Time: %1.4f RPM: %1.4f Speed: %1.4f Throttle: %1.4f Lean: %1.4f" % 
+	return ("Time: %d RPM: %d Speed: %d Throttle: %d Lean: %d" % 
 		(fc_time, fc_rpm, fc_speed, fc_throttle, fc_leanAngle))
 
 
@@ -243,7 +197,6 @@ def main():
 
 	#gpsCart = toCartesian(plotLink) #returns ordered pairs for graphing GPS route
 	gpxLat, gpxLong, xList, yList = toCartesian(plotLink)
-	#print(xList)
 
 	#make a dictionary of points to use for the dot on the GPS plot
 	gpsDots = {}
@@ -318,8 +271,6 @@ def main():
 	fig.subplots_adjust(hspace=.5) #spacing between the plots
 	ax = plt.gca() #get the current axes
 
-
-
 	plt.xlim(0, 500) #limit the x axis to 500 data points at a time
 
 	fig.suptitle("Use the 'Pan Axes' button to move the data plot left and right", 
@@ -375,25 +326,13 @@ def main():
 			TRACK = ET.SubElement(ROOT, 'trk')
 			NAME = ET.SubElement(TRACK, 'name')
 			NAME.text = 'GPX Track'
-			#for point in plotLink:
 			TRACKSEG = ET.SubElement(TRACK, 'trkseg')
-			#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
-			#LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
-			#print(gpsDots)
 
 			for item in gpsDots:
-				#print(gpsDots[item][0])
-				#print(point)
-				#splitPoints = point.split(',')
 				TRACKPOINT = ET.SubElement(TRACKSEG, 'trkpt')
 				TRACKPOINT.set('lat', str(gpsDots[item][0]))
 				TRACKPOINT.set('lon', str(gpsDots[item][1]))
-			#ET.dump(XMLVER)
-			#rootString = ET.dump(ROOT)
-			#kmlOutput = open('kmlOutput.kml', 'w')
-			#kmlOutput.write('<?xml version="1.0" encoding="UTF-8"?>')
-			#kmlOutput.write(ET.tostring(ROOT))
-			#kmlOutput.close()
+
 			tree = ET.ElementTree(ROOT)
 			tree.write("UNIQUEname.gpx")
 
