@@ -39,7 +39,7 @@ def toCartesian(dictOfPoints):
 		#latitude manipulation
 		if "+" in temp[0]:
 			latDeg = temp[0][1:]
-			int(latDeg) #make sure it's an int
+			latDeg = int(latDeg) #make sure it's an int
 		if "-" in temp[0]:
 			latDeg = temp[0][1:]
 			latDeg = (-(int(latDeg))) #make sure it's an int
@@ -48,14 +48,27 @@ def toCartesian(dictOfPoints):
 		#longitude
 		if "+" in temp[2]:
 			lonDeg = temp[2][1:]
-			int(lonDeg)
+			lonDeg = int(lonDeg)
 		if "-" in temp[2]:
 			lonDeg = temp[2][1:]
-			int(lonDeg)
+			lonDeg = (-(int(lonDeg)))
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
-		lat = float(latDeg) + (latMin / 60)
-		lon = float(lonDeg) + (lonMin / 60)
+
+		#lat = float(latDeg) + (latMin / 60)
+		#lon = float(lonDeg) + (lonMin / 60)
+		#If the coordinate is negative, subtract to get the correct final coordinate
+		if latDeg < 0:
+			lat = float(latDeg) - (latMin / 60)
+		else:
+			lat = float(latDeg) + (latMin / 60)
+
+		if lonDeg < 0:
+			lon = float(lonDeg) - (lonMin / 60)
+		else:
+			lon = float(lonDeg) + (lonMin / 60)
+		
+
 
 		if (lat > 90.0) or (lat < -90.0):
 			raise ValueError("Latitude value out of range " + str(lat))
@@ -114,6 +127,18 @@ def kmlCoords(dictOfPoints):
 	while i < len(kmlLon):
 		kmlCoordinates.append(kmlLat[i] + ", " + kmlLon[i])
 		i = i+1
+
+#formats the coordinates given in the bottom right corner of the figure when
+#you mouse over the bottom plot
+def format_coord(x, y):
+	fc_time = 0  #x
+	fc_rpm = 0
+	fc_throttle = 0
+	fc_leanAngle = 0
+	fc_speed = 0
+	return ("Time: %1.4f RPM: %1.4f Speed: %1.4f Throttle: %1.4f Lean: %1.4f" % 
+		(fc_time, fc_rpm, fc_speed, fc_throttle, fc_leanAngle))
+
 
 
 
@@ -298,7 +323,6 @@ def main():
 	#	EVENT HANDLING STUFF - For mouse movement
 
 	#-------------------------------------------------
-
 	class Cursor:
 	    def __init__(self, ax):
 	        self.ax = ax
@@ -317,8 +341,8 @@ def main():
 	        	x, y = event.xdata, event.ydata
 	        	mouseX = int(event.xdata)
 	        	# update the line positions
-	        	self.lx.set_ydata(y )
-	        	self.ly.set_xdata(x )
+	        	self.lx.set_ydata(y)
+	        	self.ly.set_xdata(x)
 	        	plt.plot(xList[mouseX], yList[mouseX], 'ro', linewidth=1) #GPS Dot
 	        	plt.draw()
 
@@ -343,14 +367,15 @@ def main():
 			TRACKSEG = ET.SubElement(TRACK, 'trkseg')
 				#NAME = PLACEMARK.SubElement(PLACEMARK, 'name')
 			#LINESTRING = ET.SubElement(PLACEMARK, 'LineString')
-			
-			
-			for index, point in enumerate(kmlCoordinates):
-				print(point)
-				splitPoints = point.split(',')
+			#print(gpsDots)
+
+			for item in gpsDots:
+				#print(gpsDots[item][0])
+				#print(point)
+				#splitPoints = point.split(',')
 				TRACKPOINT = ET.SubElement(TRACKSEG, 'trkpt')
-				TRACKPOINT.set('lat', splitPoints[0])
-				TRACKPOINT.set('lon', splitPoints[1])
+				TRACKPOINT.set('lat', str(gpsDots[item][0]))
+				TRACKPOINT.set('lon', str(gpsDots[item][1]))
 			#ET.dump(XMLVER)
 			#rootString = ET.dump(ROOT)
 			#kmlOutput = open('kmlOutput.kml', 'w')
@@ -366,6 +391,8 @@ def main():
 	callback = Kml()
 	toKMLButton = Button(btn, "GPS to KML")
 	toKMLButton.on_clicked(callback.toKML)
+
+	ax.format_coord = format_coord
 
 	plt.show()
 
