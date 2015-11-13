@@ -96,11 +96,12 @@ def toCartesian(dictOfPoints):
 #formats the coordinates given in the bottom right corner of the figure when
 #you mouse over the bottom plot
 def format_coord(x, y):
-	fc_time = 0  #x
-	fc_rpm = 0
-	fc_throttle = 0
-	fc_leanAngle = 0
-	fc_speed = 0
+	xLocation = int(x)
+	fc_time = xLocation  #x
+	fc_rpm = rpm[xLocation]
+	fc_throttle = throttlePos[xLocation]
+	fc_leanAngle = leanAngle[xLocation]
+	fc_speed = speed[xLocation]
 	return ("Time: %d RPM: %d Speed: %d Throttle: %d Lean: %d" % 
 		(fc_time, fc_rpm, fc_speed, fc_throttle, fc_leanAngle))
 
@@ -110,6 +111,11 @@ def format_coord(x, y):
 #-------------------------------------------------------------------
 #			END of Function Definitions - Start of main program
 #-------------------------------------------------------------------
+rpm = []
+throttlePos = []
+leanAngle = []
+speed = []
+
 def main():
 	root = Tk()
 	root.fileName = filedialog.askopenfilename( filetypes = 
@@ -132,10 +138,7 @@ def main():
 
 	latitude = []
 	longitude = []
-	rpm = []
-	throttlePos = []
-	leanAngle = []
-	speed = []
+
 
 	plotLink = {} #dictionary to link the mouse position in the lower plot to a dot on the GPS plot
 
@@ -195,7 +198,7 @@ def main():
 
 		#cartesian x/y = (degrees + minutes/60)
 
-	#gpsCart = toCartesian(plotLink) #returns ordered pairs for graphing GPS route
+	#gpxLat and gpxLong are used for output to the GPX file - xList and yList are used for plotting the route
 	gpxLat, gpxLong, xList, yList = toCartesian(plotLink)
 
 	#make a dictionary of points to use for the dot on the GPS plot
