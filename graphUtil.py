@@ -55,11 +55,6 @@ def toCartesian(dictOfPoints):
 			lonDeg = (-(int(lonDeg)))
 		lonMin = float(temp[3][:-1]) #get rid of E/W
 
-
-		#formatted to display the graph properly
-		latGraph = float(latDeg) + (latMin / 60)
-		lonGraph = float(lonDeg) + (lonMin / 60)
-
 		#below is formatting to get the correct Latitude and Longitude for Google Earth
 		#If the coordinate is negative, subtract to get the correct final coordinate
 		if latDeg < 0:
@@ -71,7 +66,15 @@ def toCartesian(dictOfPoints):
 			lon = float(lonDeg) - (lonMin / 60)
 		else:
 			lon = float(lonDeg) + (lonMin / 60)
-		
+
+		#have to do this to get all of the route gps coordinates to display properly...
+		latDeg = latDeg + (-1*(latDeg*2))
+		lonDeg = lonDeg + (-1*(lonDeg*2))
+
+		#formatted to display the graph properly
+		latGraph = float(latDeg) + (latMin / 60)
+		lonGraph = float(lonDeg) + (lonMin / 60)
+
 
 		#Error checking
 		if (lat > 90.0) or (lat < -90.0):
