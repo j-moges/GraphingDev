@@ -351,6 +351,12 @@ def main():
 
 	ax.format_coord = format_coord
 
+	fig.canvas.set_window_title("Vehicle Data Viewer") #title of window
+
+	#maximize the window on startup
+	figMgr = plt.get_current_fig_manager()
+	figMgr.window.state('zoomed') 
+
 	plt.show()
 
 main()	
