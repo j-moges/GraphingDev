@@ -10,6 +10,10 @@ class TestFunctions(unittest.TestCase):
 			, 2: '-181 0.0 87 0.0'
 		}
 
+		testCoordinatesBAD2 = {
+			1: '20 0.0 90 0.1'
+		}
+
 		testCoordinatesGOOD = {
 			1: '-90 0.0 -180 0.0'
 		}
@@ -21,6 +25,7 @@ class TestFunctions(unittest.TestCase):
 
 		with self.assertRaises(ValueError):
 			toCartesian(testCoordinatesBAD) 
+			toCartesian(testCoordinatesBAD2)
 
 if __name__ == '__main__':
 	unittest.main()
