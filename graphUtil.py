@@ -279,7 +279,8 @@ def main():
 
 	plt.xlim(0, 500) #limit the x axis to 500 data points at a time
 
-	fig.suptitle("Use the 'Pan Axes' button to move the data plot left and right", 
+	fig.suptitle("Use the 'Pan Axes' button to move the data plot left and right.  " +  
+		"Hold the 'X' key while scrolling horizontally", 
 		fontweight='bold')
 
 
